@@ -1,0 +1,25 @@
+SET SERVEROUTPUT ON;/*Sirve para ver el mensaje como salida de script para no activar la salida DBMS*/
+
+-- Comentario de una línea
+
+/*
+ Comentario
+ Multi Línea
+*/
+
+
+DECLARE
+  /*DECLARACION DE VARIABLE*/
+BEGIN
+  /*SECTOR DE PROGRAMACIÓN*/
+  DBMS_OUTPUT.PUT_LINE('HOLA MUNDO');
+END;
+
+----------------------------------------------------------------------------------------------
+
+DECLARE
+ v_nombre VARCHAR2 (40);
+BEGIN
+ v_nombre:='&ingrese_nombre';
+ DBMS_OUTPUT.put_line('Hola ' || INITCAP(v_nombre));
+END;

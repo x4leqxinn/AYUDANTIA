@@ -1,0 +1,66 @@
+SET SERVEROUTPUT ON;
+
+-- CICLOS
+
+-- CICLO LOOP
+DECLARE
+    v_contador NUMBER(4,0) DEFAULT 0;
+BEGIN
+    LOOP
+        v_contador := v_contador + 1;
+        dbms_output.put_line('Contador ' || v_contador);
+        EXIT WHEN v_contador = 5;
+    END LOOP;
+END;
+
+-- CICLO WHILE
+DECLARE
+    v_contador NUMBER(2,0) DEFAULT 0;
+BEGIN
+    WHILE v_contador < 5
+    LOOP
+        v_contador := v_contador + 1;
+        DBMS_OUTPUT.PUT_LINE('Contador : ' || v_contador);
+    END LOOP;
+END;
+
+-- CICLO FOR
+
+BEGIN
+    FOR v_contador IN 1..8 
+    LOOP
+        DBMS_OUTPUT.PUT_LINE(v_contador);
+    END LOOP;
+END;
+
+
+
+-- ESTRUCTURAS DE CONTROL
+
+-- IF - ELSEIF - ELSE
+
+DECLARE
+    v_edad NUMBER(3,0) DEFAULT &edad;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Tienes ' || v_edad || ' años.');
+    IF v_edad > 0 and v_edad < 18 THEN
+        DBMS_OUTPUT.PUT_LINE('Es menor de edad.');
+    ELSIF v_edad >= 18 AND v_edad < 65 THEN 
+        DBMS_OUTPUT.PUT_line('Es legal');
+    ELSIF v_edad >= 65 AND v_edad <= 90 THEN 
+        DBMS_OUTPUT.PUT_line('Es de la tercera edad');
+    ELSE 
+        DBMS_OUTPUT.PUT_LINE('La edad no está en el rango :(');
+    END IF;
+END;
+
+
+-- CASE WHEN
+
+SELECT SYSDATE,
+CASE 
+    WHEN TO_DATE(SYSDATE) = TO_DATE('01/05/2022') THEN 'Es hoy.'
+    WHEN TO_DATE(SYSDATE) = TO_DATE('02/05/2022') THEN 'Es Mañana.'
+    ELSE 'Es otro dia :(.'
+END AS "CASE"
+FROM DUAL;

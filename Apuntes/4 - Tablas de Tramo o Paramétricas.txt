@@ -1,0 +1,46 @@
+--Ejemplos
+
+--Activamos la visualizacion por Salida Script
+SET SERVEROUTPUT ON;
+-------------------------------------------------------------------------------
+
+--Uso de tablas de tramos
+
+--creamos la tabla  de tramos porc_movilizacion
+
+create table porc_movilizacion(
+    sec_movilizacion number(3)primary key,
+    sueldo_base_inf number(8)not null,
+    sueldo_base_sup number(8)not null,
+    porc_mov number(2)not null
+)
+
+create sequence sq_mov;
+
+insert into porc_movilizacion values(sq_mov.nextval,100000,300000,50);
+insert into porc_movilizacion values(sq_mov.nextval,300001,1000000,30);
+insert into porc_movilizacion values(sq_mov.nextval,1000001,2500000,20);
+insert into porc_movilizacion values(sq_mov.nextval,2500001,8000000,5);
+
+select * from porc_movilizacion;
+
+-------------------------------------------------------------------------------
+--Uso de tabla de tramos
+DECLARE
+--Declara la variable v_porc para guardar el porcentaje
+    v_porc number;
+BEGIN
+--Utilizamos el for para rescatar los datos del empleado
+    For reg in (select * from empleado)
+--Utilizamos el loop para recatar el porc_mov y guardarlo en v_porc que esten
+-- acorde al where 
+    loop
+        select porc_mov into v_porc 
+        from porc_movilizacion
+        where reg.sueldo_base_emp between sueldo_base_inf and sueldo_base_sup;
+        
+        DBMS_OUTPUT.PUT_LINE('SUELDO : ' || reg.sueldo_base_emp);
+        
+        DBMS_OUTPUT.PUT_LINE('Porcentaje : '|| v_porc);
+    end loop;
+END; 

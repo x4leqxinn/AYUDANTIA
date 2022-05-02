@@ -1,0 +1,155 @@
+
+
+-- PARTE 1
+
+-- DECLARAMOS la variable BIND
+VARIABLE b_fecha_proceso VARCHAR2(10);
+
+EXEC :b_fecha_proceso := TO_CHAR(SYSDATE,'DD/MM/YYYY');
+
+PRINT :b_fecha_proceso;
+
+-- CALCULO DE LOS PROMEDIOS
+
+DECLARE
+    reg_promedio PROMEDIO_ASIG_ALUMNO%rowtype;
+BEGIN
+    FOR x IN ( select a.numrut_alumno,a.dvrut_alumno,a.pnombre_alumno,
+                        a.snombre_alumno,a.appat_alumno,a.apmat_alumno,
+                        c.sigla_curso,asig.sigla_asignatura,na.nota1,na.nota2,na.nota3,
+                        na.nota4,na.nota5,a.cod_alumno,asig.cod_asignatura 
+                    from alumno a 
+                    inner join nota_alumno na on na.cod_alumno = a.cod_alumno
+                    inner join curso c on c.cod_curso = a.cod_curso
+                    inner join asignatura asig on na.cod_asignatura = asig.cod_asignatura
+                    where c.cod_curso  LIKE 'PM%' OR c.sigla_curso LIKE 'SM%')
+    LOOP
+        -- Cálculos
+        reg_promedio.COD_ALUMNO := x.cod_alumno;
+        reg_promedio.COD_ASIGNATURA := x.COD_ASIGNATURA;
+        reg_promedio.PROMEDIO_ASIG := ROUND( (x.nota1 + x.nota2 + x.nota3 + x.nota4 + x.nota5) / 5,2);
+        
+        -- Tabla de tramos
+        SELECT situacion INTO reg_promedio.SITUACION_ASIG FROM TRAMO_SITUACION_ASIG WHERE reg_promedio.PROMEDIO_ASIG   BETWEEN promedio_inf AND promedio_sup;
+        
+        -- Objetivo
+        INSERT INTO PROMEDIO_ASIG_ALUMNO VALUES reg_promedio;
+        
+    END LOOP;
+END;
+
+-- Crear una secuencia
+CREATE SEQUENCE seq_resumen_aprob;
+
+drop SEQUENCE seq_resumen_aprob;
+
+commit;
+
+-- PROCESAR RESUMEN APROBADOS
+DECLARE
+    reg_aprobados RESUMEN_APROBADOS%rowtype;
+    v_situacion PROMEDIO_ASIG_ALUMNO.SITUACION_ASIG%type;
+BEGIN
+
+    EXECUTE IMMEDIATE 'TRUNCATE TABLE RESUMEN_APROBADOS';
+    COMMIT; 
+    
+    FOR x IN 
+    (
+             select a.numrut_alumno,a.dvrut_alumno,a.pnombre_alumno,
+                        a.snombre_alumno,a.appat_alumno,a.apmat_alumno,
+                        c.sigla_curso,asig.sigla_asignatura,na.nota1,na.nota2,na.nota3,
+                        na.nota4,na.nota5,a.cod_alumno,asig.cod_asignatura , p.SITUACION_ASIG
+                    from alumno a 
+                    inner join nota_alumno na on na.cod_alumno = a.cod_alumno
+                    inner join curso c on c.cod_curso = a.cod_curso
+                    inner join asignatura asig on na.cod_asignatura = asig.cod_asignatura
+                    INNER JOIN PROMEDIO_ASIG_ALUMNO p
+                    ON a.cod_alumno = p.cod_alumno
+                    where c.cod_curso  LIKE 'PM%' OR c.sigla_curso LIKE 'SM%'
+    )
+    LOOP
+        
+        
+        v_situacion := x.situacion_asig;
+        
+        
+        IF  v_situacion = 'APROBADO' THEN
+                
+            -- Cálculos
+            reg_aprobados.SEC_APROBADOS := seq_resumen_aprob.nextval;
+            reg_aprobados.NUMRUT_ALUMNO := x.numrut_alumno;
+            reg_aprobados.DVRUT_ALUMNO := x.dvrut_alumno;
+            reg_aprobados.PNOMBRE_ALUMNO :=  x.pnombre_alumno;
+            reg_aprobados.SNOMBRE_ALUMNO := x.snombre_alumno;
+            reg_aprobados.APPAT_ALUMNO := x.APPAT_ALUMNO;
+            reg_aprobados.APMAT_ALUMNO := x.APMAT_ALUMNO;
+            reg_aprobados.SIGLA_CURSO := x.SIGLA_CURSO;
+            reg_aprobados.SIGLA_ASIGNATURA := x.SIGLA_ASIGNATURA;
+            reg_aprobados.ANNIO_PROCESO := TO_NUMBER(TO_CHAR(TO_DATE(:b_fecha_proceso),'YYYY'));
+    
+            -- Objetivo INSERTAR RESUMEN APROBADOS
+        
+            INSERT INTO RESUMEN_APROBADOS VALUES reg_aprobados;
+            COMMIT;
+        END IF;
+        
+    END LOOP;
+END;
+
+
+
+DECLARE
+    reg_aprobados RESUMEN_APROBADOS%rowtype;
+    v_situacion PROMEDIO_ASIG_ALUMNO.SITUACION_ASIG%type;
+BEGIN
+
+    EXECUTE IMMEDIATE 'TRUNCATE TABLE RESUMEN_REPROBADOS';
+    COMMIT; 
+    
+    FOR x IN 
+    (
+             select a.numrut_alumno,a.dvrut_alumno,a.pnombre_alumno,
+                        a.snombre_alumno,a.appat_alumno,a.apmat_alumno,
+                        c.sigla_curso,asig.sigla_asignatura,na.nota1,na.nota2,na.nota3,
+                        na.nota4,na.nota5,a.cod_alumno,asig.cod_asignatura , p.SITUACION_ASIG
+                    from alumno a 
+                    inner join nota_alumno na on na.cod_alumno = a.cod_alumno
+                    inner join curso c on c.cod_curso = a.cod_curso
+                    inner join asignatura asig on na.cod_asignatura = asig.cod_asignatura
+                    INNER JOIN PROMEDIO_ASIG_ALUMNO p
+                    ON a.cod_alumno = p.cod_alumno
+                    where c.cod_curso  LIKE 'PM%' OR c.sigla_curso LIKE 'SM%'
+    )
+    LOOP
+        
+        
+        v_situacion := x.situacion_asig;
+        
+        
+        IF  v_situacion = 'REPROBADO' THEN
+                
+            -- Cálculos
+            reg_aprobados.SEC_APROBADOS := seq_resumen_aprob.nextval;
+            reg_aprobados.NUMRUT_ALUMNO := x.numrut_alumno;
+            reg_aprobados.DVRUT_ALUMNO := x.dvrut_alumno;
+            reg_aprobados.PNOMBRE_ALUMNO :=  x.pnombre_alumno;
+            reg_aprobados.SNOMBRE_ALUMNO := x.snombre_alumno;
+            reg_aprobados.APPAT_ALUMNO := x.APPAT_ALUMNO;
+            reg_aprobados.APMAT_ALUMNO := x.APMAT_ALUMNO;
+            reg_aprobados.SIGLA_CURSO := x.SIGLA_CURSO;
+            reg_aprobados.SIGLA_ASIGNATURA := x.SIGLA_ASIGNATURA;
+            reg_aprobados.ANNIO_PROCESO := TO_NUMBER(TO_CHAR(TO_DATE(:b_fecha_proceso),'YYYY'));
+    
+            -- Objetivo INSERTAR RESUMEN APROBADOS
+        
+            INSERT INTO RESUMEN_REPROBADOS VALUES reg_aprobados;
+            COMMIT;
+        END IF;
+        
+    END LOOP;
+END;
+
+SET SERVEROUTPUT ON;
+
+        

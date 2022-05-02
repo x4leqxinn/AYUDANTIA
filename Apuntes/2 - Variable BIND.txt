@@ -1,0 +1,34 @@
+-- Ejemplo en el SCHEMA HR
+
+VARIABLE NUMERO NUMBER;
+EXECUTE :NUMERO :=120;
+
+DECLARE
+
+BEGIN
+   DBMS_OUTPUT.PUT_LINE('el valor de la variable host: ' || :NUMERO);
+END;
+
+DECLARE
+
+BEGIN
+    SELECT SALARY INTO :NUMERO
+    FROM employees WHERE employee_id = 120;
+    DBMS_OUTPUT.put_line('EL NUEVO VALOR ES: ' || :NUMERO);
+END;
+
+
+
+-- Declaración de variable BIND
+VARIABLE b_fecha VARCHAR2(10);
+
+-- Mutar la variable BIND (Asignar valor)
+EXECUTE :b_fecha := sysdate;
+
+-- Ver el contenido actual de la variable BIND
+PRINT :b_fecha;
+
+-- Ver el contenido actual de la variable BIND mediante Bloque Anónimo
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('La Fecha es ' || :b_fecha);
+END;

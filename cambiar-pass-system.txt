@@ -1,0 +1,27 @@
+-- Permite conectarse a la base de datos sin iniciar sesión con un usuario
+sqlplus /nolog 
+
+-- Permite conectarse como usuario administrador de base de datos
+sqlplus / as sysdba
+
+-- Con esta sentencia podemos reestablecer la contraseña del usuario system
+ALTER USER system IDENTIFIED BY "nueva_contraseña";
+
+-- Confirmamos los cambios realizados
+COMMIT;
+
+-- Salimos del entorno de base de datos y del cmd
+exit
+
+
+-- NOTA
+/*
+ 1. Si estamos usando la base de datos ORACLE 11g XE debemos conectarnos al usuario con la SID xe
+ 2. Si estamos usando la base de datos ORACLE 19c orcl debemos conectarnos al usuario con la SID orcl
+
+*/
+
+
+
+-- SCRIPT para poder crear poder gestionar la BDD en ORACLE 19c
+alter session set "_oracle_script"=true;
